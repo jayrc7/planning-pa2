@@ -137,28 +137,29 @@ class GameStateProblem(Problem):
         return solution ## Solution is an ordered list of (s,a)
     """
     def define_path(self, current_state, parent, actions_taken):
-        # will contain the reverse of the solution
+        # contains complete path 
         solution = []
 
-        # iterate until initial state is reached
-        levels = 0
-        while current_state is not None:
-            # first get action taken at this state
-            action = actions_taken[current_state]
+        # first append end state
+        solution.append((current_state, None))
 
-            # if action is not defined, use "None" instead
-            if action == ():
-                action = None
+        # iterate until initial state is reached
+        while parent[current_state] is not None:
+            # first get action taken to get to this state
+            action_taken = actions_taken[current_state]
+
+            # now get the parent of the current state
+            current_parent = parent[current_state]
 
             # append current state and action taken
-            solution.append((current_state, action))
+            solution.append((current_parent, action_taken))
+
             current_state = parent[current_state]
-            levels += 1
 
         # reverse solution before returning
-        print("levels: ", levels)
-        print("reversed solution: ", solution)
         solution.reverse()
+
+
         return solution
 
     def search_alg(self):
