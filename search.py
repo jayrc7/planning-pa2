@@ -164,7 +164,7 @@ class GameStateProblem(Problem):
 
     def search_alg(self):
         # first create queue
-        q = queue.PriorityQueue()
+        q = queue.Queue()
 
         # queue to hold parents
         parent = defaultdict(tuple)
@@ -176,7 +176,7 @@ class GameStateProblem(Problem):
         cost = defaultdict(int)
 
         # put initial state into the queue from the start
-        q.put((0, self.initial_state))
+        q.put(self.initial_state)
 
         # mark initial state as visited
         visited[self.initial_state] = True
@@ -195,7 +195,7 @@ class GameStateProblem(Problem):
         # play until goal state is reached
         while not q.empty():
             # get current state
-            current_cost, current_state = q.get()
+            current_state = q.get()
 
             # check if current state is goal state
             if self.is_goal(current_state):
@@ -210,12 +210,12 @@ class GameStateProblem(Problem):
                 next_state = self.execute(current_state, action)
 
                 # add onto queue if the state hasn't been visited yet or cost is lower
-                if not visited[next_state] or cost[current_state] + 1 < cost[next_state]:
+                if not visited[next_state]:
                     # update cost
                     cost[next_state] = cost[current_state] + 1
 
                     # add onto queue
-                    q.put((cost[next_state], next_state))
+                    q.put(next_state)
 
                     # mark it as visited
                     visited[next_state] = True
