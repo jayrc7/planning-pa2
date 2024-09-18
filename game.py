@@ -158,7 +158,7 @@ class Rules:
 
         # list moves that the piece can make from here
         moves = [
-            (col - 1, row + 2,), # up     2, left   1
+            (col - 1, row + 2), # up     2, left   1
             (col + 1, row + 2), # up     2, right  1
             (col - 1, row - 2), # down   2, left   1
             (col + 1, row - 2), # down   2, right  1
@@ -169,7 +169,7 @@ class Rules:
         ]
         # getting location of all pieces
         whites_pieces = board_state.state[:5] 
-        blacks_pieces  = board_state.state[7:11]
+        blacks_pieces  = board_state.state[6:11]
         all_pieces = np.concatenate((whites_pieces, blacks_pieces))
 
         # filter out invalid moves due to out of bounds or location being occupied already
@@ -220,7 +220,7 @@ class Rules:
             # make sure there's no opponent pieces in between
             pieces_in_between = [op for op in opponent_pieces if op[0] >= leftmost_x and op[0] <= rightmost_x and op[1] == p1_y]
 
-            # return false if there was a piece in between them
+            # no pieces in between, return True
             if len(pieces_in_between) == 0: return True
 
         # check if they're in the same column
@@ -228,14 +228,10 @@ class Rules:
             # make sure there's no opponent pieces in between
             pieces_in_between = [op for op in opponent_pieces if op[1] >= bottom_y and op[1] <= top_y and op[0] == p1_x]
 
-            # return false if there was a piece in between them
+            # no pieces in between, return True
             if len(pieces_in_between) == 0: return True
 
         else: # else check if we can reach it via a diagonal
-            # encode positions since it's easier to determine if they're diagonal this way
-            encoded_p1 = board_state.encode_single_pos(p1)
-            encoded_p2 = board_state.encode_single_pos(p2)
-
             # check to see if the two pieces are diagonal (right diagonal) from each other
             if abs(p1_x - p2_x) == abs(p1_y - p2_y):
                 # try to find an opponent that blocks the diagonal
@@ -245,17 +241,14 @@ class Rules:
 
                     # first check to see if opponent piece is within x, y range
                     if current_opp[0] >= leftmost_x and current_opp[0] <= rightmost_x and current_opp[1] <= top_y and current_opp[1] >= bottom_y:
-                        # encode current opp piece
-                        encoded_opp = board_state.encode_single_pos(current_opp)
-
                         # now check if it's on the same diagonal, return false if it is
-                        if (encoded_p1 - encoded_opp) % 8 == 0: 
+                        if  abs(p1_x - current_opp[0]) == abs(p1_y - current_opp[1]): 
                             return False
 
                 # return true at this point since no opp was in the way
                 return True
 
-        # no criteria for a blocked path was met, return True
+        # no clear path, return False
         return False
 
     @staticmethod
@@ -489,19 +482,15 @@ class GameSimulator:
         relative_idx = action[0]
         new_position_location = action[1]
 
-        # check to see which player we are
-        if player_idx % 2 == 0: # we're the white player
-            temp_board.state[relative_idx]     = new_position_location
-        else:
-            temp_board.state[6 + relative_idx] = new_position_location
+        # generate moves the current player can create
+        moves = Rules.single_piece_actions(temp_board, (6 * player_idx) + relative_idx) if relative_idx < 5 else Rules.single_ball_actions(temp_board, player_idx)
 
-        # check if new board state is valid
-        valid_state = temp_board.is_valid()
-        if not valid_state:
-            raise ValueError("Game State was not valid after making this move!")
-        else:
+        # check to see if new position is in list of valid moves the piece can make
+        if new_position_location in moves: 
             return True
-    
+        else: 
+            raise ValueError("move not allowed!")
+
     def update(self, action: tuple, player_idx: int):
         """
         Uses a validated action and updates the game board state

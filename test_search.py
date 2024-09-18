@@ -70,14 +70,32 @@ class TestSearch:
         assert (0,6) not in generated_actions
         assert (4,0) not in generated_actions
 
-    ## NOTE: You are highly encouraged to add failing test cases here
-    ## in order to test your validate_action implementation. To add an
-    ## invalid action, fill in the action tuple, the player_idx, the
-    ## validity boolean (would be False for invalid actions), and a
-    ## unique portion of the descriptive error message that your raised
-    ## ValueError should return. For example, if you raised:
-    ## ValueError("Cannot divide by zero"), then you would pass some substring
-    ## of that description for val_msg.
+    # @pytest.mark.parametrize("goal_transform,opt_len", [
+    #     (((1,22),(5,22),(11,50)), 6),
+    #     (((1,22),(5,22),(6,37),(11,37)), 6),
+    #     (((4,20),(5,20),(6,22),(11,22)), 7),
+    # ])
+
+    # def test_search_cases(self, goal_transform, opt_len):
+    #     b1 = BoardState()
+    #     b2 = BoardState()
+    #     print("hi")
+    #     for idx, pos in goal_transform:
+    #         b2.update(idx, pos)
+
+    #     gsp = GameStateProblem(b1, b2, 0)
+    #     gsp.set_search_alg("")
+    #     sln = gsp.search_alg_fnc()
+
+    #     assert len(sln) == opt_len
+    # NOTE: You are highly encouraged to add failing test cases here
+    # in order to test your validate_action implementation. To add an
+    # invalid action, fill in the action tuple, the player_idx, the
+    # validity boolean (would be False for invalid actions), and a
+    # unique portion of the descriptive error message that your raised
+    # ValueError should return. For example, if you raised:
+    # ValueError("Cannot divide by zero"), then you would pass some substring
+    # of that description for val_msg.
     @pytest.mark.parametrize("action,player,is_valid,val_msg", [
         ((0,14), 0, True, ""),
         ((0,16), 0, True, ""),
@@ -86,6 +104,7 @@ class TestSearch:
         ((5,2), 0, True, ""),
         ((5,4), 0, True, ""),
         ((5,5), 0, True, ""),
+        ((4,0), 0, False, "not allowed")
     ])
     def test_validate_action(self, action, player, is_valid, val_msg):
         sim = GameSimulator(None)

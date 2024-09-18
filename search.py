@@ -172,9 +172,6 @@ class GameStateProblem(Problem):
         # keeps track of visited states
         visited = defaultdict(bool)
 
-        # cost calculator
-        cost = defaultdict(int)
-
         # put initial state into the queue from the start
         q.put(self.initial_state)
 
@@ -186,11 +183,6 @@ class GameStateProblem(Problem):
 
         # define dict to contain actions taken
         actions_taken = defaultdict(tuple)
-
-        cost[self.initial_state] = 0
-        
-        visited_count = {}
-        visited_count[self.initial_state] = 1
 
         # play until goal state is reached
         while not q.empty():
@@ -211,9 +203,6 @@ class GameStateProblem(Problem):
 
                 # add onto queue if the state hasn't been visited yet or cost is lower
                 if not visited[next_state]:
-                    # update cost
-                    cost[next_state] = cost[current_state] + 1
-
                     # add onto queue
                     q.put(next_state)
 
