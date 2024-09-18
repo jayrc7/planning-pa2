@@ -1,6 +1,7 @@
 import numpy as np
 import queue
 from game import BoardState, GameSimulator, Rules
+from collections import defaultdict
 
 class Problem:
     """
@@ -65,7 +66,7 @@ class GameStateProblem(Problem):
 
         TODO: You need to set self.search_alg_fnc here
         """
-        self.search_alg_fnc = None
+        self.search_alg_fnc = self.search_alg
 
     def get_actions(self, state: tuple):
         """
@@ -135,4 +136,95 @@ class GameStateProblem(Problem):
         ## ...
         return solution ## Solution is an ordered list of (s,a)
     """
+    def define_path(self, current_state, parent, actions_taken):
+        # will contain the reverse of the solution
+        solution = []
+
+        # iterate until initial state is reached
+        levels = 0
+        while current_state is not None:
+            # first get action taken at this state
+            action = actions_taken[current_state]
+
+            # if action is not defined, use "None" instead
+            if action == ():
+                action = None
+
+            # append current state and action taken
+            solution.append((current_state, action))
+            current_state = parent[current_state]
+            levels += 1
+
+        # reverse solution before returning
+        print("levels: ", levels)
+        print("reversed solution: ", solution)
+        solution.reverse()
+        return solution
+
+    def search_alg(self):
+        # first create queue
+        q = queue.PriorityQueue()
+
+        # queue to hold parents
+        parent = defaultdict(tuple)
+
+        # keeps track of visited states
+        visited = defaultdict(bool)
+
+        # cost calculator
+        cost = defaultdict(int)
+
+        # put initial state into the queue from the start
+        q.put((0, self.initial_state))
+
+        # mark initial state as visited
+        visited[self.initial_state] = True
+
+        # make parent of start state none
+        parent[self.initial_state] = None
+
+        # define dict to contain actions taken
+        actions_taken = defaultdict(tuple)
+
+        cost[self.initial_state] = 0
+        
+        visited_count = {}
+        visited_count[self.initial_state] = 1
+
+        # play until goal state is reached
+        while not q.empty():
+            # get current state
+            current_cost, current_state = q.get()
+
+            # check if current state is goal state
+            if self.is_goal(current_state):
+                return self.define_path(current_state, parent, actions_taken)
+
+            # get available actions from this state  
+            actions = self.get_actions(current_state)
+
+            # take each action if not visited yet
+            for action in actions: 
+                # take the current action
+                next_state = self.execute(current_state, action)
+
+                # add onto queue if the state hasn't been visited yet or cost is lower
+                if not visited[next_state] or cost[current_state] + 1 < cost[next_state]:
+                    # update cost
+                    cost[next_state] = cost[current_state] + 1
+
+                    # add onto queue
+                    q.put((cost[next_state], next_state))
+
+                    # mark it as visited
+                    visited[next_state] = True
+
+                    # mark parent of new action
+                    parent[next_state] = current_state
+
+                    # mark the action we took to get to this state
+                    actions_taken[next_state] = action
+
+        # no optimal path was found
+        return []
 

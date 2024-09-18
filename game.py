@@ -158,16 +158,15 @@ class Rules:
 
         # list moves that the piece can make from here
         moves = [
-            (row + 2, col - 1), # up     2, left   1
-            (row + 2, col + 1), # up     2, right  1
-            (row - 2, col - 1), # down   2, left   1
-            (row - 2, col + 1), # down   2, right  1
-            (row + 1, col + 2), # right  2, up     1
-            (row - 1, col + 2), # right  2, down   1
-            (row + 1, col - 2), # left   2, up     1
-            (row - 1, col - 2)  # left   2, down   1
+            (col - 1, row + 2,), # up     2, left   1
+            (col + 1, row + 2), # up     2, right  1
+            (col - 1, row - 2), # down   2, left   1
+            (col + 1, row - 2), # down   2, right  1
+            (col + 2, row + 1), # right  2, up     1
+            (col + 2, row - 1), # right  2, down   1
+            (col - 2, row + 1), # left   2, up     1
+            (col - 2, row - 1)  # left   2, down   1
         ]
-
         # getting location of all pieces
         whites_pieces = board_state.state[:5] 
         blacks_pieces  = board_state.state[7:11]
@@ -308,8 +307,6 @@ class Rules:
             
             # if the current location contains one of the player's pieces
             if current_piece in current_pieces:
-                print("current piece found! ", current_piece)
-
                 # increment amount of pieces found
                 pieces_found += 1
 
@@ -459,7 +456,7 @@ class GameSimulator:
             current_piece = current_pieces[i]
 
             # generate valid moves for piece or ball
-            valid_moves = Rules.single_piece_actions(self.game_state, current_piece) if i < 5 else Rules.single_ball_actions(self.game_state, player_idx)
+            valid_moves = Rules.single_piece_actions(self.game_state, player_idx * 6 + i) if i < 5 else Rules.single_ball_actions(self.game_state, player_idx)
 
             # create a tuple for each move
             for move in valid_moves:
