@@ -298,21 +298,22 @@ class Rules:
 
         # iterate until we either have no more neighbors or we've visited all pieces already
         # while pq and pieces_found < 4:
-        for current_piece in sorted_current_pieces:
-            # current_tup = pq.get()
-            # current_piece = current_tup[1]
-            
-            # first check to see if there's a direct, unblocked path from the ball to the current piece
-            if Rules.clear_path(current_ball, current_piece, opponent_pieces, board_state):
-                final_moves.add(board_state.encode_single_pos(current_piece)) # if so, append piece to list of moves it can make 
+        for i in range(0, 4): 
+            for current_piece in sorted_current_pieces:
+                # current_tup = pq.get()
+                # current_piece = current_tup[1]
+                
+                # first check to see if there's a direct, unblocked path from the ball to the current piece
+                if Rules.clear_path(current_ball, current_piece, opponent_pieces, board_state):
+                    final_moves.add(board_state.encode_single_pos(current_piece)) # if so, append piece to list of moves it can make 
 
-            # if not, check to see if there's a clear path between the current piece and a valid move
-            # keep updating just in case we have a new valid path that enables others
-            for valid_move in final_moves:
-                # if there is a clear path, that means we can hop to this piece
-                if Rules.clear_path(board_state.decode_single_pos(valid_move), current_piece, opponent_pieces, board_state):
-                    final_moves.add(board_state.encode_single_pos(current_piece))
-                    break
+                # if not, check to see if there's a clear path between the current piece and a valid move
+                # keep updating just in case we have a new valid path that enables others
+                for valid_move in final_moves:
+                    # if there is a clear path, that means we can hop to this piece
+                    if Rules.clear_path(board_state.decode_single_pos(valid_move), current_piece, opponent_pieces, board_state):
+                        final_moves.add(board_state.encode_single_pos(current_piece))
+                        break
             
             # traverse neighbors now
             # for i in range(8):
