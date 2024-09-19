@@ -53,6 +53,8 @@ class GameStateProblem(Problem):
               turn.
         """
         super().__init__(tuple((tuple(initial_board_state.state), player_idx)), set([tuple((tuple(goal_board_state.state), 0)), tuple((tuple(goal_board_state.state), 1))]))
+        self.initial = initial_board_state.state
+        self.goal_state = goal_board_state.state
         self.sim = GameSimulator(None)
         self.search_alg_fnc = None
         self.set_search_alg()
@@ -136,6 +138,13 @@ class GameStateProblem(Problem):
         ## ...
         return solution ## Solution is an ordered list of (s,a)
     """
+    # computes the distance between all pieces in next state vs end state
+    def heuristic(self, current_state):
+        return np.linalg.norm(self.initial - current_state[0])
+
+    def edge_cost(self, next_state):
+        return np.linalg.norm(next_state[0] - self.goal_state)
+
     def define_path(self, current_state, parent, actions_taken):
         # contains complete path 
         solution = []
@@ -166,7 +175,7 @@ class GameStateProblem(Problem):
 
     def search_alg(self):
         # first create queue
-        q = queue.Queue()
+        q = queue.PriorityQueue()
 
         # queue to hold parents
         parent = defaultdict(tuple)
@@ -175,7 +184,7 @@ class GameStateProblem(Problem):
         visited = defaultdict(bool)
 
         # put initial state into the queue from the start
-        q.put(self.initial_state)
+        q.put((0, self.initial_state))
 
         # mark initial state as visited
         visited[self.initial_state] = True
@@ -186,10 +195,14 @@ class GameStateProblem(Problem):
         # define dict to contain actions taken
         actions_taken = defaultdict(tuple)
 
+        # cost
+        cost = defaultdict(float)
+        cost[self.initial_state] = 0.0
+
         # play until goal state is reached
         while not q.empty():
             # get current state
-            current_state = q.get()
+            current_cost, current_state = q.get()
 
             # check if current state is goal state
             if self.is_goal(current_state):
@@ -203,10 +216,16 @@ class GameStateProblem(Problem):
                 # take the current action
                 next_state = self.execute(current_state, action)
 
+                # assign new cost
+                new_cost = cost[current_state] + self.edge_cost(next_state)
+
                 # add onto queue if the state hasn't been visited yet or cost is lower
-                if not visited[next_state]:
+                if not visited[next_state] or new_cost < cost[next_state]:
+                    # update cost
+                    cost[next_state] = new_cost
+
                     # add onto queue
-                    q.put(next_state)
+                    q.put((new_cost + self.heuristic(current_state), next_state))
 
                     # mark it as visited
                     visited[next_state] = True
