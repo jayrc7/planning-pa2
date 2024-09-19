@@ -291,87 +291,86 @@ class Rules:
         pq.put((0, current_ball))
         visited = defaultdict(bool)
         visited[board_state.encode_single_pos(current_ball)] = True
+        cost = defaultdict(int)
+        cost[current_ball] = 0
+
+        sorted_current_pieces = sorted(current_pieces, key=board_state.encode_single_pos)
 
         # iterate until we either have no more neighbors or we've visited all pieces already
-        #for piece in sorted_current_pieces:
-        while pq and pieces_found < 4:
-            current_tup = pq.get()
-            current_piece = current_tup[1]
+        # while pq and pieces_found < 4:
+        for current_piece in sorted_current_pieces:
+            # current_tup = pq.get()
+            # current_piece = current_tup[1]
             
-            # if the current location contains one of the player's pieces
-            if current_piece in current_pieces:
-                # increment amount of pieces found
-                pieces_found += 1
+            # first check to see if there's a direct, unblocked path from the ball to the current piece
+            if Rules.clear_path(current_ball, current_piece, opponent_pieces, board_state):
+                final_moves.add(board_state.encode_single_pos(current_piece)) # if so, append piece to list of moves it can make 
 
-                # first check to see if there's a direct, unblocked path from the ball to the current piece
-                if Rules.clear_path(current_ball, current_piece, opponent_pieces, board_state):
-                    final_moves.add(board_state.encode_single_pos(current_piece)) # if so, append piece to list of moves it can make 
-
-                # if not, check to see if there's a clear path between the current piece and a valid move
-                # keep updating just in case we have a new valid path that enables others
-                for valid_move in final_moves:
-                    # if there is a clear path, that means we can hop to this piece
-                    if Rules.clear_path(board_state.decode_single_pos(valid_move), current_piece, opponent_pieces, board_state):
-                        final_moves.add(board_state.encode_single_pos(current_piece))
-                        break
+            # if not, check to see if there's a clear path between the current piece and a valid move
+            # keep updating just in case we have a new valid path that enables others
+            for valid_move in final_moves:
+                # if there is a clear path, that means we can hop to this piece
+                if Rules.clear_path(board_state.decode_single_pos(valid_move), current_piece, opponent_pieces, board_state):
+                    final_moves.add(board_state.encode_single_pos(current_piece))
+                    break
             
             # traverse neighbors now
-            for i in range(8):
-                # left neighbor
-                if i == 0 and current_piece[0] - 1 >= 0:
-                    left_piece = (current_piece[0] - 1, current_piece[1])
-                    if not visited[board_state.encode_single_pos(left_piece)]:
-                        pq.put((board_state.encode_single_pos(left_piece), left_piece))
-                        visited[board_state.encode_single_pos(left_piece)] = True
+            # for i in range(8):
+            #     # left neighbor
+            #     if i == 0 and current_piece[0] - 1 >= 0:
+            #         left_piece = (current_piece[0] - 1, current_piece[1])
+            #         if not visited[board_state.encode_single_pos(left_piece)]:
+            #             pq.put((board_state.encode_single_pos(left_piece), left_piece))
+            #             visited[board_state.encode_single_pos(left_piece)] = True
                 
-                # right neighbor
-                if i == 1 and current_piece[0] + 1 < board_state.N_COLS:
-                    right_piece = (current_piece[0] + 1, current_piece[1])
-                    if not visited[board_state.encode_single_pos(right_piece)]:
-                        pq.put((board_state.encode_single_pos(right_piece), right_piece))
-                        visited[board_state.encode_single_pos(right_piece)] = True
+            #     # right neighbor
+            #     if i == 1 and current_piece[0] + 1 < board_state.N_COLS:
+            #         right_piece = (current_piece[0] + 1, current_piece[1])
+            #         if not visited[board_state.encode_single_pos(right_piece)]:
+            #             pq.put((board_state.encode_single_pos(right_piece), right_piece))
+            #             visited[board_state.encode_single_pos(right_piece)] = True
 
-                # up neighbor
-                if i == 2 and current_piece[1] + 1 < board_state.N_ROWS:
-                    up_piece = (current_piece[0], current_piece[1] + 1)
-                    if not visited[board_state.encode_single_pos(up_piece)]:
-                        pq.put((board_state.encode_single_pos(up_piece), up_piece))
-                        visited[board_state.encode_single_pos(up_piece)] = True
+            #     # up neighbor
+            #     if i == 2 and current_piece[1] + 1 < board_state.N_ROWS:
+            #         up_piece = (current_piece[0], current_piece[1] + 1)
+            #         if not visited[board_state.encode_single_pos(up_piece)]:
+            #             pq.put((board_state.encode_single_pos(up_piece), up_piece))
+            #             visited[board_state.encode_single_pos(up_piece)] = True
 
-                # down neighbor
-                if i == 3 and current_piece[1] - 1 >= 0:
-                    down_piece = (current_piece[0], current_piece[1] - 1)
-                    if not visited[board_state.encode_single_pos(down_piece)]:
-                        pq.put((board_state.encode_single_pos(down_piece), down_piece))
-                        visited[board_state.encode_single_pos(down_piece)] = True
+            #     # down neighbor
+            #     if i == 3 and current_piece[1] - 1 >= 0:
+            #         down_piece = (current_piece[0], current_piece[1] - 1)
+            #         if not visited[board_state.encode_single_pos(down_piece)]:
+            #             pq.put((board_state.encode_single_pos(down_piece), down_piece))
+            #             visited[board_state.encode_single_pos(down_piece)] = True
 
-                # up-left neighbor
-                if i == 4 and current_piece[0] - 1 >= 0 and current_piece[1] + 1 < board_state.N_ROWS:
-                    up_left_piece = (current_piece[0] - 1, current_piece[1] + 1)
-                    if not visited[board_state.encode_single_pos(up_left_piece)]:
-                        pq.put((board_state.encode_single_pos(up_left_piece), up_left_piece))
-                        visited[board_state.encode_single_pos(up_left_piece)] = True
+            #     # up-left neighbor
+            #     if i == 4 and current_piece[0] - 1 >= 0 and current_piece[1] + 1 < board_state.N_ROWS:
+            #         up_left_piece = (current_piece[0] - 1, current_piece[1] + 1)
+            #         if not visited[board_state.encode_single_pos(up_left_piece)]:
+            #             pq.put((board_state.encode_single_pos(up_left_piece), up_left_piece))
+            #             visited[board_state.encode_single_pos(up_left_piece)] = True
 
-                # up-right neighbor
-                if i == 5 and current_piece[0] + 1 < board_state.N_COLS and current_piece[1] + 1 < board_state.N_ROWS:
-                    up_right_piece = (current_piece[0] + 1, current_piece[1] + 1)
-                    if not visited[board_state.encode_single_pos(up_right_piece)]:
-                        pq.put((board_state.encode_single_pos(up_right_piece), up_right_piece))
-                        visited[board_state.encode_single_pos(up_right_piece)] = True
+            #     # up-right neighbor
+            #     if i == 5 and current_piece[0] + 1 < board_state.N_COLS and current_piece[1] + 1 < board_state.N_ROWS:
+            #         up_right_piece = (current_piece[0] + 1, current_piece[1] + 1)
+            #         if not visited[board_state.encode_single_pos(up_right_piece)]:
+            #             pq.put((board_state.encode_single_pos(up_right_piece), up_right_piece))
+            #             visited[board_state.encode_single_pos(up_right_piece)] = True
 
-                # down-right neighbor
-                if i == 6 and current_piece[0] + 1 < board_state.N_COLS and current_piece[1] - 1 >= 0:
-                    down_right_piece = (current_piece[0] + 1, current_piece[1] - 1)
-                    if not visited[board_state.encode_single_pos(down_right_piece)]:
-                        pq.put((board_state.encode_single_pos(down_right_piece), down_right_piece))
-                        visited[board_state.encode_single_pos(down_right_piece)] = True
+            #     # down-right neighbor
+            #     if i == 6 and current_piece[0] + 1 < board_state.N_COLS and current_piece[1] - 1 >= 0:
+            #         down_right_piece = (current_piece[0] + 1, current_piece[1] - 1)
+            #         if not visited[board_state.encode_single_pos(down_right_piece)]:
+            #             pq.put((board_state.encode_single_pos(down_right_piece), down_right_piece))
+            #             visited[board_state.encode_single_pos(down_right_piece)] = True
 
-                # down-left neighbor
-                if i == 7 and current_piece[0] - 1 >= 0 and current_piece[1] - 1 >= 0:
-                    down_left_piece = (current_piece[0] - 1, current_piece[1] - 1)
-                    if not visited[board_state.encode_single_pos(down_left_piece)]:
-                        pq.put((board_state.encode_single_pos(down_left_piece), down_left_piece))
-                        visited[board_state.encode_single_pos(down_left_piece)] = True
+            #     # down-left neighbor
+            #     if i == 7 and current_piece[0] - 1 >= 0 and current_piece[1] - 1 >= 0:
+            #         down_left_piece = (current_piece[0] - 1, current_piece[1] - 1)
+            #         if not visited[board_state.encode_single_pos(down_left_piece)]:
+            #             pq.put((board_state.encode_single_pos(down_left_piece), down_left_piece))
+            #             visited[board_state.encode_single_pos(down_left_piece)] = True
         
         # return valid moves that can be made by the player during this turn
         return final_moves

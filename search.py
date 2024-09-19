@@ -144,7 +144,9 @@ class GameStateProblem(Problem):
         solution.append((current_state, None))
 
         # iterate until initial state is reached
+        levels = 0
         while parent[current_state] is not None:
+            levels+=1
             # first get action taken to get to this state
             action_taken = actions_taken[current_state]
 
